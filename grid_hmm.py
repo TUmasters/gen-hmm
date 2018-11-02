@@ -10,6 +10,8 @@ class GridHMM:
         self.width = width
         self.height = height
         self.p = p
+        self.states = list(itertools.product(range(width), range(height)))
+        self.observations = self.states
 
     def _check_bound(self, x):
         return x[0] >= 0 and x[0] < self.width \
@@ -36,6 +38,9 @@ class GridHMM:
         return adj_states, below_states
 
     def initial_p(self, x=None):
+        """Returns the probability of entering state x initially. If x
+        is not given, gives all nonzero initialization probabilities in
+        the form (state, probability)"""
         if x:
             if x[1] > 0:
                 return 0
@@ -45,6 +50,9 @@ class GridHMM:
             return [((x,0),1.0/self.width) for x in range(self.width)]
 
     def transition_p(self, x1, x2=None):
+        """Returns transition probability from state x1 to x2. If x2 is
+        not given, then returns all nonzero transition probabilities in
+        the form (state, probability)."""
         adj, below = self._get_transition_states(x1)
         probs = [0.05 for x3 in adj] + [0.3 for x3 in below]
         probs = [p / sum(probs) for p in probs]
@@ -58,7 +66,9 @@ class GridHMM:
             return probs
 
     def observation_p(self, x, o=None):
-        """Returns the probability of observing o in state x. If o is not given"""
+        """Returns the probability of observing o in state x. If o is
+        not given, then returns all nonzero observation probabilities in
+        the form (observation, probability)."""
         if not self._check_bound(x):
             raise ValueError("Invalid state provided: {}".format(x))
 
